@@ -1,4 +1,4 @@
-fname,lname,time,class,labtime,classtime,grading,officehr,classprep,other,week
+fname,lname,time,classID,labtime,classtime,grading,officehr,classprep,other,week
 Aditi,Mallavarapu,8/27/17 - 9/2/17,CS 100,4.50,10.00,0.00,4.50,1.00,0.00,1
 Aditi,Mallavarapu,9/3/17 - 9/9/17,CS 100,4.50,0.00,1.00,4.50,1.00,0.00,2
 Aditi,Mallavarapu,9/10/17 - 9/16/17,CS 100,4.50,0.00,1.00,4.50,1.00,0.00,3
