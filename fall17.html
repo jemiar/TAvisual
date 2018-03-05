@@ -186,6 +186,8 @@ d3.csv("https://raw.githubusercontent.com/jemiar/TAvisual/master/fall17data.csv"
   //append legend rect
   var legenRect = legen
     .append("rect")
+    .attr("class", "legendRec")
+    .attr("id", function(d) { return "Rec" + d.key.replace(/\s/g, ''); })
     //position rect
     .attr("x", function(d, i) {
       if(i%2 == 0)
@@ -204,6 +206,7 @@ d3.csv("https://raw.githubusercontent.com/jemiar/TAvisual/master/fall17data.csv"
     .attr("fill", function(d) {return z(d.key); })
     //when click on rect, show or hide line chart
     .on("click", function(d, i) {
+      console.log(d3.select("g#" + d.key.replace(/\s/g, '')));
       console.log(d3.select("g#" + d.key.replace(/\s/g, ''))._groups[0][0]);
       d3.select("g#" + d.key.replace(/\s/g, ''))
         .transition().duration(100)
@@ -211,14 +214,37 @@ d3.csv("https://raw.githubusercontent.com/jemiar/TAvisual/master/fall17data.csv"
           if(d3.select("g#" + d.key.replace(/\s/g, ''))._groups[0][0].style.opacity == 0)
             return 1;
           else
-            return 0;});
+            return 0; });
+
+      d3.select("#Rec" + d.key.replace(/\s/g, ''))
+        .transition().duration(100)
+        .style("fill", function() {
+          if(d3.select("g#" + d.key.replace(/\s/g, ''))._groups[0][0].style.opacity == 0)
+            return z(d.key);
+          else
+            return "#d9d9d9";
+        });
+
+      d3.select("#Txt" + d.key.replace(/\s/g, ''))
+        .transition().duration(100)
+        .style("stroke", function() {
+          if(d3.select("g#" + d.key.replace(/\s/g, ''))._groups[0][0].style.opacity == 0){
+            if(i%2 == 0)
+              return "#fff";
+            else
+              return "#000";
+          } else
+            return "#fff";
+        });
+
     });
 
   //append legend text
   var legendText = legen
     .append("text")
     .text(function(d) {return d.key})
-    .attr("stroke", "#fff")
+    .attr("class", "legendTxt")
+    .attr("id", function(d) { return "Txt" + d.key.replace(/\s/g, ''); })
     //align text to be in the middle of its corresponding rect
     .attr("x", function(d, i) {
       if(i%2 == 0)
@@ -250,6 +276,27 @@ d3.csv("https://raw.githubusercontent.com/jemiar/TAvisual/master/fall17data.csv"
             return 1;
           else
             return 0;});
+
+      d3.select("#Rec" + d.key.replace(/\s/g, ''))
+        .transition().duration(100)
+        .style("fill", function() {
+          if(d3.select("g#" + d.key.replace(/\s/g, ''))._groups[0][0].style.opacity == 0)
+            return z(d.key);
+          else
+            return "#d9d9d9";
+        });
+
+      d3.select("#Txt" + d.key.replace(/\s/g, ''))
+        .transition().duration(100)
+        .style("stroke", function() {
+          if(d3.select("g#" + d.key.replace(/\s/g, ''))._groups[0][0].style.opacity == 0){
+            if(i%2 == 0)
+              return "#fff";
+            else
+              return "#000";
+          } else
+            return "#fff";
+        });
     });
 
     //add clear button: when clicked, all lines' opacity is 0
@@ -260,6 +307,14 @@ d3.csv("https://raw.githubusercontent.com/jemiar/TAvisual/master/fall17data.csv"
         d3.selectAll(".classN")
         .transition().duration(100)
         .style("opacity", 0);
+
+        d3.selectAll(".legendRec")
+        .transition().duration(100)
+        .style("fill", "#d9d9d9");
+
+        d3.selectAll(".legendTxt")
+        .transition().duration(100)
+        .style("stroke", "#fff");
         console.log(d3.select(".line"));
       });
 
