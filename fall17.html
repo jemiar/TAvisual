@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <link rel="stylesheet" href="styles.css">
   <style>
 
     button {
@@ -37,7 +38,9 @@
 <body>
   <h1>TA hours by class (Fall 17)</h1>
   <div class="clearButton"></div>
-  <svg class="chart" width="1010" height="550"></svg>
+  <div class="chartDiv">
+    <svg class="chart" width="1010" height="550"></svg>
+  </div>
   <svg class="legend" width="160" height="500"></svg>
   <script src="https://d3js.org/d3.v4.min.js"></script>
   <script>
@@ -56,6 +59,10 @@
       width = svg.attr("width") - margin.left - margin.right,
       height = svg.attr("height") - margin.top - margin.bottom,
       g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var tooltip = d3.select(".chartDiv")
+                    .append("div")
+                    .attr("class", "toolTip");
 
     //set range for x, y, z
     var x = d3.scaleLinear().range([0, width]),
@@ -167,13 +174,26 @@
         .attr("class", "marker")
         .attr("cx", line.x())
         .attr("cy", line.y())
-        .attr("r", 4.5);
+        .attr("r", 5.0)
+        .on("mouseover", function(d) {
+          // console.log(d3.select("g#" + this.parentNode.parentNode.id)._groups[0][]);
+          if(d3.select("g#" + this.parentNode.parentNode.id)._groups[0][0].style.opacity == 1)
+            tooltip.style("left", d3.mouse(this)[0] + 90 + "px")
+                  .style("top", d3.mouse(this)[1] + 60 + "px")
+                  .style("display", "inline-block")
+                  .html(this.parentNode.parentNode.id + "<br>" + "Week " + d.week + " : " + d.total + "hrs");
+          else
+            tooltip.style("display", "none");
+        })
+        .on("mouseout", function() {
+          tooltip.style("display", "none");
+        });
 
     //style each circle to its corresponding color
     className.selectAll("g")
         .style("stroke", function(d) { return z(d.key); })
         .style("stroke-width", 2.5)
-        .style("fill", "none");
+        .style("fill", function(d) { return z(d.key); });
 
     //used for debugging
     console.log(className.selectAll("g").data());
