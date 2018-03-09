@@ -8,3 +8,31 @@
   padding: 14px;
   text-align: center;
 }
+
+button {
+  font-size: 35px;
+ }
+
+.axis--x {
+  font-size: 20px;
+}
+
+.axis--y {
+  font-size: 20px;
+}
+
+.tick text {
+  y: 20px;
+}
+
+.legend {
+  position: relative;
+  top: 15px;
+  right: 10px;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
