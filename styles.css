@@ -31,8 +31,18 @@ button {
   right: 10px;
 }
 
+.legendHistogram {
+  position: relative;
+  top: 15px;
+  right: 10px;
+}
+
 .line {
   fill: none;
   stroke: steelblue;
   stroke-width: 1.5px;
+}
+
+.bar {
+	fill: steelblue;
 }

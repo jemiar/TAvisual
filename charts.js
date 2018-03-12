@@ -17,10 +17,15 @@ var tooltip = d3.select(".chartDiv")
                 .append("div")
                 .attr("class", "toolTip");
 
+//histogram
+var histogramChart = d3.select(".histogram"),
+  histogramG = histogramChart.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
 //set range for x, y, z
 var x = d3.scaleLinear().range([0, width]),
     y = d3.scaleLinear().range([height, 0]),
-    z = d3.scaleOrdinal(d3.schemeCategory20);
+    z = d3.scaleOrdinal(d3.schemeCategory20)
+    xHistogram = d3.scaleBand().range([0, width]).padding(0.05);
 
 //define line function
 var line = d3.line()
@@ -68,6 +73,7 @@ d3.csv("https://raw.githubusercontent.com/jemiar/TAvisual/master/fall17data.csv"
     d3.max(hxe, function(c) {return d3.max(c.val, function(d) {return d.total; }); })
   ]);
   z.domain(hrByClass.map(function(c) {return c.key; }));
+  xHistogram.domain(hxe[0].val.map(function(d) {return d.week;}));
 
   //append x axis
   g.append("g")
@@ -301,6 +307,131 @@ d3.csv("https://raw.githubusercontent.com/jemiar/TAvisual/master/fall17data.csv"
   //     .attr("id", function(d
   //     .style("font", "10px sans-serif")
   //     .text(function(d) { return d.id; });
+  //--------------------------------------------------------------------
+  //--------------------------------------------------------------------
+  //----------------------------SECOND CHART----------------------------
+  //--------------------------------------------------------------------
+  //--------------------------------------------------------------------
+
+  //append x axis
+  histogramG.append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(xHistogram).ticks(17))
+    .append("text")
+      .attr("transform", "translate(" + (width/2) + ",30)")
+      .attr("y", 8)
+      .attr("dy", "0.71em")
+      .attr("fill", "#000")
+      .attr("text-align", "right")
+      .style("font-size", "30px")
+      .text("Week");
+
+  //append y axis
+  histogramG.append("g")
+      .attr("class", "axis axis--y")
+      .call(d3.axisLeft(y).ticks(7));
+
+  //append text to y axis
+  histogramG.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0 - margin.left + 30)
+      .attr("x", 0 - (height / 2) - 50)
+      .attr("dy", "0.71em")
+      .attr("fill", "#000")
+      .style("font-size", "30px")
+      .style("font-family", "sans-serif")
+      .text("Working hours");
+
+  var barChart = histogramG.selectAll(".bar")
+      .data(hxe[0].val)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) {return xHistogram(d.week);})
+      .attr("width", xHistogram.bandwidth())
+      .attr("y", function(d) {return y(d.total);})
+      .attr("height", function(d) {return height - y(d.total);});
+
+  //append graphic element to the legend part on the right
+  var legendHis = d3.select(".legendHistogram")
+      .append("g")
+      .selectAll(".classHistogram")
+      .data(hxe)
+      .enter().append("g")
+      .attr("class", "classHistogram");
+
+  //append legend rect
+  var histogramRect = legendHis
+      .append("rect")
+      .attr("class", "histogramRec")
+      .attr("id", function(d) { return "histogramRec" + d.key.replace(/\s/g, ''); })
+      //position rect
+      .attr("x", function(d, i) {
+        if(i%2 == 0)
+          return 0;
+        else
+          return 75;
+      })
+      .attr("y", function(d, i){
+        if(i%2 == 0)
+          return i/2*35;
+        else
+          return (i-1)/2*35;
+      })
+      .attr("width", 70)
+      .attr("height", 30)
+      .attr("fill", "#d9d9d9")
+      //when click on rect, show or hide line chart
+      .on("click", function(d, i) {
+        histogramRect.style("fill", "#d9d9d9");
+        histogramText.style("stroke", "#000");
+        d3.select(this).style("fill", "steelblue");
+        histogramText._groups[0][i].style.stroke = "#fff";
+        console.log(barChart);
+        barChart.data(hxe[i].val).transition().duration(500)
+          .attr("x", function(d) {return xHistogram(d.week);})
+          .attr("width", xHistogram.bandwidth())
+          .attr("y", function(d) {return y(d.total);})
+          .attr("height", function(d) {return height - y(d.total);});
+      });
+
+  //append legend text
+  var histogramText = legendHis
+       .append("text")
+       .text(function(d) {return d.key})
+       .attr("class", "histogramTxt")
+       .attr("id", function(d) { return "Txt" + d.key.replace(/\s/g, ''); })
+  //     //align text to be in the middle of its corresponding rect
+       .attr("x", function(d, i) {
+        if(i%2 == 0)
+          return 10;
+        else
+          return  85;
+      })
+      .attr("y", function(d, i) {
+        if(i%2 == 0)
+          return i/2*35 + 10;
+        else
+          return (i-1)/2*35 + 10;
+      })
+      .attr("dy", "0.6em")
+      .style("font", "lighter 15px sans-serif")
+      .style("stroke", "#000")
+      .on("click", function(d, i) {
+        histogramRect.style("fill", "#d9d9d9");
+        histogramText.style("stroke", "#000");
+        d3.select(this).style("stroke", "#fff");
+        histogramRect._groups[0][i].style.fill = "steelblue";
+        barChart.data(hxe[i].val).transition().duration(500)
+          .attr("x", function(d) {return xHistogram(d.week);})
+          .attr("width", xHistogram.bandwidth())
+          .attr("y", function(d) {return y(d.total);})
+          .attr("height", function(d) {return height - y(d.total);});
+      });
+  
+  d3.select(".histogramRec").style("fill", "steelblue");
+  d3.select(".histogramTxt").style("stroke", "#fff");
+
 });
 
 //make sure to change from string to number
