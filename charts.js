@@ -1,4 +1,4 @@
-//week numbering, used for cleaning data
+//week numbering -> used for cleaning data
 var weekdata = [
       1, 2, 3, 4,
       5, 6, 7, 8,
@@ -327,10 +327,16 @@ d3.csv("https://raw.githubusercontent.com/jemiar/TAvisual/master/fall17data.csv"
       .style("font-size", "30px")
       .text("Week");
 
+  y.domain([
+          d3.min(hxe[0].val, function(d) {return d.total; }),
+          d3.max(hxe[0].val, function(d) {return d.total; })
+        ]);
+
   //append y axis
   histogramG.append("g")
       .attr("class", "axis axis--y")
-      .call(d3.axisLeft(y).ticks(7));
+      .attr("id", "histogramYAxis")
+      .call(d3.axisLeft(y));
 
   //append text to y axis
   histogramG.append("text")
@@ -388,6 +394,16 @@ d3.csv("https://raw.githubusercontent.com/jemiar/TAvisual/master/fall17data.csv"
         d3.select(this).style("fill", "steelblue");
         histogramText._groups[0][i].style.stroke = "#fff";
         console.log(barChart);
+
+        y.domain([
+          d3.min(hxe[i].val, function(d) {return d.total; }),
+          d3.max(hxe[i].val, function(d) {return d.total; })
+        ]);
+
+        d3.select("#histogramYAxis")
+          .transition().duration(500)
+          .call(d3.axisLeft(y));
+
         barChart.data(hxe[i].val).transition().duration(500)
           .attr("x", function(d) {return xHistogram(d.week);})
           .attr("width", xHistogram.bandwidth())
@@ -422,6 +438,16 @@ d3.csv("https://raw.githubusercontent.com/jemiar/TAvisual/master/fall17data.csv"
         histogramText.style("stroke", "#000");
         d3.select(this).style("stroke", "#fff");
         histogramRect._groups[0][i].style.fill = "steelblue";
+
+        y.domain([
+          d3.min(hxe[i].val, function(d) {return d.total; }),
+          d3.max(hxe[i].val, function(d) {return d.total; })
+        ]);
+
+        d3.select("#histogramYAxis")
+          .transition().duration(500)
+          .call(d3.axisLeft(y));
+
         barChart.data(hxe[i].val).transition().duration(500)
           .attr("x", function(d) {return xHistogram(d.week);})
           .attr("width", xHistogram.bandwidth())
