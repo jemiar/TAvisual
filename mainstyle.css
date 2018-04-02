@@ -1,0 +1,20 @@
+.axisX {
+	font-size: 20px;
+}
+
+.axisY {
+	font-size: 20px;
+}
+
+.barF17 {
+	fill: steelblue;
+}
+
+.barS18 {
+	fill: #dd1c77;
+}
+
+.legendSpr18 {
+	position: absolute;
+	top: 650px;
+}
