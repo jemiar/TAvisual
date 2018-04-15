@@ -7,15 +7,18 @@ var weekNo = [
 
 var chartF17 = d3.select(".chartFall17"),
 	chartS18 = d3.select(".chartSpr18"),
-	chartHistogram = d3.select(".histogram");
+	chartHistogram = d3.select(".histogram"),
+  slider = d3.select(".slider");
 
 var margin = {top: 20, right: 80, bottom: 80, left: 100},
 	width = chartF17.attr("width") - margin.left - margin.right,
-	height = chartF17.attr("height") - margin.top - margin.bottom;
+	height = chartF17.attr("height") - margin.top - margin.bottom,
+  sliderWidth = +slider.attr("width") - 70;
 
 var chartF17Graphic = chartF17.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")"),
 	chartS18Graphic = chartS18.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")"),
-	chartHistogramGraphic = chartHistogram.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	chartHistogramGraphic = chartHistogram.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")"),
+  sliderGraphic = slider.append("g").attr("transform", "translate(35, 35)");
 
 var x = d3.scaleBand().range([0, width]).padding(0.05),
 	yF17 = d3.scaleLinear().range([height, 0]),
@@ -342,7 +345,7 @@ function drawChart(error, fall17data, spring18data) {
 
   	var fall17ByClassFilter = fall17ByClass.filter(function(eF17) {
   		return spring18ByClass.find(function(eS18) { return eF17.key == eS18.key; });
-  	});
+    });
   	console.log(fall17ByClassFilter);
 
   	var spring18ByClassFilter = spring18ByClass.filter(function(eS18) {
@@ -368,7 +371,7 @@ function drawChart(error, fall17data, spring18data) {
 		var binsFall17 = d3.histogram()
 			.domain(xScale.domain())
 			.thresholds(xScale.ticks(upperLimit / 10))
-			(fall17ByClassFilter[i].val.map(function(d) { return d.total; }));
+			(fall17ByClassFilter[i].val.filter(function(e) { return e.total != 0; }).map(function(d) { return d.total; }));
 
 		binsFall17.pop();
 
@@ -379,15 +382,10 @@ function drawChart(error, fall17data, spring18data) {
 			}
 		});
 
-		// binsFall17Map.push({
-		// 	key: "[" + upperLimit + ", " + (upperLimit + 10) + "]",
-		// 	frequency: 0
-		// });
-
 		var binsSpring18 = d3.histogram()
 			.domain(xScale.domain())
 			.thresholds(xScale.ticks(upperLimit / 10))
-			(spring18ByClassFilter[i].val.map(function(d) { return d.total; }));
+			(spring18ByClassFilter[i].val.filter(function(e) { return e.total != 0; }).map(function(d) { return d.total; }));
 
 		binsSpring18.pop();
 
@@ -398,13 +396,8 @@ function drawChart(error, fall17data, spring18data) {
 			}
 		});
 
-		// binsSpring18Map.push({
-		// 	key: "[" + upperLimit + ", " + (upperLimit + 10) + "]",
-		// 	frequency: 0
-		// });
-
 		console.log(binsFall17Map);
-  		console.log(binsSpring18Map);
+  	console.log(binsSpring18Map);
   	}
 
   	updateData(0);
@@ -600,6 +593,60 @@ function drawChart(error, fall17data, spring18data) {
             .attr("width", xHistogram.bandwidth() / 2)
             .attr("y", function(d) { return yHistogram(d.frequency); })
             .attr("height", function(d) { return height - yHistogram(d.frequency); });
+    }
+
+    //////////////////////////////////////////////////////////////////////////////
+    //Adding slider
+    //////////////////////////////////////////////////////////////////////////////
+    var xSlider = d3.scaleLinear()
+        .domain([0, 4])
+        .range([0, sliderWidth])
+        .clamp(true);
+
+    sliderGraphic.append("line")
+        .attr("class", "track")
+        .attr("x1", xSlider.range()[0])
+        .attr("x2", xSlider.range()[1])
+      .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+        .attr("class", "track-inset")
+      .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+        .attr("class", "track-overlay")
+        .call(d3.drag()
+          .on("start.interrupt", function() { sliderGraphic.interrupt(); })
+          .on("start drag", function() { updateSlider(xSlider.invert(d3.event.x)); })
+          );
+
+    sliderGraphic.insert("g", ".track")
+        .attr("class", "ticks")
+        .attr("transform", "translate(0, -15)")
+      .selectAll("text")
+      .data([0, sliderWidth])
+      .enter().append("text")
+        .attr("x", xSlider)
+        .attr("text-anchor", "middle")
+        .text(function(d) {
+          if(d == 0)
+            return "Fine";
+          else
+            return "Coarse";
+        })
+        .style("font-size", "20px");
+
+    var handle = sliderGraphic.insert("circle", ".track-overlay")
+        .attr("class", "handle")
+        .attr("cx", xSlider(4))
+        .attr("r", 9);
+
+    function updateSlider(p) {
+      handle.attr("cx", xSlider(p));
+      if(p <= 1)
+        console.log("1");
+      else if(p <= 2 && p > 1)
+        console.log("2");
+      else if(p <= 3 && p > 2)
+        console.log("5");
+      else
+        console.log("10");
     }
 }
 
