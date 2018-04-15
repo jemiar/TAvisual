@@ -16,5 +16,13 @@
 
 .legendSpr18 {
 	position: absolute;
-	top: 650px;
+	top: 680px;
+}
+
+.barF17Histogram {
+	fill: steelblue;
+}
+
+.barS18Histogram {
+	fill: #dd1c77;
 }

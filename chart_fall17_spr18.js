@@ -6,18 +6,21 @@ var weekNo = [
 ];
 
 var chartF17 = d3.select(".chartFall17"),
-	chartS18 = d3.select(".chartSpr18");
+	chartS18 = d3.select(".chartSpr18"),
+	chartHistogram = d3.select(".histogram");
 
 var margin = {top: 20, right: 80, bottom: 80, left: 100},
 	width = chartF17.attr("width") - margin.left - margin.right,
 	height = chartF17.attr("height") - margin.top - margin.bottom;
 
-var chartF17Graphic = chartF17.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-	chartS18Graphic = chartS18.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+var chartF17Graphic = chartF17.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")"),
+	chartS18Graphic = chartS18.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")"),
+	chartHistogramGraphic = chartHistogram.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 var x = d3.scaleBand().range([0, width]).padding(0.05),
 	yF17 = d3.scaleLinear().range([height, 0]),
-	yS18 = d3.scaleLinear().range([height, 0]);
+	yS18 = d3.scaleLinear().range([height, 0]),
+	yHistogram = d3.scaleLinear().range([height, 0]);
 
 d3.queue()
 	.defer(d3.csv, "https://raw.githubusercontent.com/jemiar/TAvisual/master/fall17data.csv", type)
@@ -334,6 +337,270 @@ function drawChart(error, fall17data, spring18data) {
 
   	d3.select(".classS18Rect").style("fill", "#dd1c77");
   	d3.select(".classS18Text").style("stroke", "#fff");
+
+  	////////////////////////////////////////////////////
+
+  	var fall17ByClassFilter = fall17ByClass.filter(function(eF17) {
+  		return spring18ByClass.find(function(eS18) { return eF17.key == eS18.key; });
+  	});
+  	console.log(fall17ByClassFilter);
+
+  	var spring18ByClassFilter = spring18ByClass.filter(function(eS18) {
+  		return fall17ByClass.find(function(eF17) { return eS18.key == eF17.key; })
+  	});
+  	console.log(spring18ByClassFilter);
+
+  	var binsFall17Map, binsSpring18Map;
+
+  	function updateData(i) {
+  		var upperLimit = d3.max([
+  		(d3.max(fall17ByClassFilter[i].val.map(function(d) { return d.total; })) / 10 + 1) * 10,
+  		(d3.max(spring18ByClassFilter[i].val.map(function(d) { return d.total; })) / 10 + 1) * 10
+  		]);
+
+  		console.log(upperLimit);
+  		
+
+		var xScale = d3.scaleLinear()
+			.domain([0, upperLimit])
+			.range([0, width]);
+
+		var binsFall17 = d3.histogram()
+			.domain(xScale.domain())
+			.thresholds(xScale.ticks(upperLimit / 10))
+			(fall17ByClassFilter[i].val.map(function(d) { return d.total; }));
+
+		binsFall17.pop();
+
+		binsFall17Map = binsFall17.map(function(d) {
+			return {
+				key: "[" + d.x0 + ", " + d.x1 + "]",
+				frequency: d.length
+			}
+		});
+
+		// binsFall17Map.push({
+		// 	key: "[" + upperLimit + ", " + (upperLimit + 10) + "]",
+		// 	frequency: 0
+		// });
+
+		var binsSpring18 = d3.histogram()
+			.domain(xScale.domain())
+			.thresholds(xScale.ticks(upperLimit / 10))
+			(spring18ByClassFilter[i].val.map(function(d) { return d.total; }));
+
+		binsSpring18.pop();
+
+		binsSpring18Map = binsSpring18.map(function(d) {
+			return {
+				key: "[" + d.x0 + ", " + d.x1 + "]",
+				frequency: d.length
+			}
+		});
+
+		// binsSpring18Map.push({
+		// 	key: "[" + upperLimit + ", " + (upperLimit + 10) + "]",
+		// 	frequency: 0
+		// });
+
+		console.log(binsFall17Map);
+  		console.log(binsSpring18Map);
+  	}
+
+  	updateData(0);
+
+  	// console.log(binsFall17Map);
+  	// console.log(binsSpring18Map);
+
+  	var xHistogram = d3.scaleBand().range([0, width]).padding(0.1);
+  	xHistogram.domain(binsFall17Map.map(e => e.key));
+
+  	yHistogram.domain([
+  		0,
+  		d3.max([
+  			d3.max(binsFall17Map.map(e => e.frequency)),
+  			d3.max(binsSpring18Map.map(e => e.frequency))
+  			])
+  		]);
+
+  	chartHistogramGraphic.append("g")
+  		.attr("class", "axisX")
+  		.attr("id", "axisXHistogram")
+  		.attr("transform", "translate(0," + height + ")")
+  		.call(d3.axisBottom(xHistogram))
+  	.append("text")
+  		.attr("transform", "translate(" + width/2 + ", 30)")
+  		.attr("y", 8)
+  		.attr("dy", "0.71em")
+  		.attr("fill", "#000")
+  		.attr("text-align", "right")
+  		.style("font-size", "30px")
+  		.text("Working hours");
+
+  	chartHistogramGraphic.append("g")
+  		.attr("class", "axisY")
+  		.attr("id", "axisYHistogram")
+  		.call(d3.axisLeft(yHistogram))
+  	.append("text")
+  		.attr("transform", "rotate(-90)")
+  		.attr("y", 0 - margin.left + 30)
+  		.attr("x", 0 - height / 2 + 100)
+  		.attr("dy", "0.71em")
+  		.attr("fill", "#000")
+  		.style("font-size", "30px")
+  		.text("Frequency");
+
+  	var f17Histogram = chartHistogramGraphic.selectAll(".barF17Histogram")
+  		.data(binsFall17Map)
+  		.enter().append("rect")
+  		.attr("class", "barF17Histogram")
+  		.attr("x", function(d) { return xHistogram(d.key); })
+  		.attr("width", xHistogram.bandwidth() / 2)
+  		.attr("y", function(d) { return yHistogram(d.frequency); })
+  		.attr("height", function(d) { return height - yHistogram(d.frequency); });
+
+  		console.log(f17Histogram);
+
+  	var s18Histogram = chartHistogramGraphic.selectAll(".barS18Histogram")
+  		.data(binsSpring18Map)
+  		.enter().append("rect")
+  		.attr("class", "barS18Histogram")
+  		.attr("x", function(d) { return xHistogram(d.key) + xHistogram.bandwidth() / 2; })
+  		.attr("width", xHistogram.bandwidth() / 2)
+  		.attr("y", function(d) { return yHistogram(d.frequency); })
+  		.attr("height", function(d) { return height - yHistogram(d.frequency); });
+
+  		console.log(s18Histogram);
+
+  	var legendHistogramGraphic = d3.select(".legendHistogram")
+  		.append("g")
+  		.selectAll(".classHistogram")
+  		.data(fall17ByClassFilter)
+  		.enter().append("g")
+  		.attr("class", "classHistogram");
+
+  	var classHistogramRect = legendHistogramGraphic.append("rect")
+  		.attr("class", "classHistogramRect")
+  		.attr("id", function(d) { return "classHistogramRect" + d.key.replace(/\s/g, ''); })
+  		.attr("x", function(d, i) {
+  			if(i%2 == 0)
+  				return 0;
+  			else
+  				return 75;
+  		})
+  		.attr("y", function(d, i) {
+  			if(i%2 == 0)
+  				return i / 2 * 35;
+  			else
+  				return (i - 1) / 2 * 35;
+  		})
+  		.attr("width", 70)
+  		.attr("height", 30)
+  		.attr("fill", "#d9d9d9")
+  		.on("click", function(d, i) {
+  			classHistogramRect.style("fill", "#d9d9d9");
+  			classHistogramText.style("stroke", "#000");
+  			d3.select(this).style("fill", "#7a0177");
+  			classHistogramText._groups[0][i].style.stroke = "#fff";
+
+  			updateData(i);
+
+  			xHistogram.domain(binsFall17Map.map(e => e.key));
+
+  			yHistogram.domain([
+		  		0,
+		  		d3.max([
+		  			d3.max(binsFall17Map.map(e => e.frequency)),
+		  			d3.max(binsSpring18Map.map(e => e.frequency))
+		  			])
+		  		]);
+
+  			drawUpdate();
+		});
+
+  	var classHistogramText = legendHistogramGraphic.append("text")
+  		.text(function(d) { return d.key; })
+  		.attr("class", "classHistogramText")
+  		.attr("x", function(d, i) {
+  			if(i%2 == 0)
+  				return 10;
+  			else
+  				return 85;
+  		})
+  		.attr("y", function(d, i) {
+  			if(i%2 == 0)
+  				return i / 2 * 35 + 10;
+  			else
+  				return (i - 1) / 2 * 35 + 10;
+  		})
+  		.attr("dy", "0.6em")
+  		.style("font", "lighter 15px sans-serif")
+  		.style("stroke", "#000")
+  		.on("click", function(d, i) {
+  			classHistogramRect.style("fill", "#d9d9d9");
+  			classHistogramText.style("stroke", "#000");
+  			d3.select(this).style("stroke", "#fff");
+  			classHistogramRect._groups[0][i].style.fill = "#7a0177";
+
+  			updateData(i);
+
+  			xHistogram.domain(binsFall17Map.map(e => e.key));
+
+  			yHistogram.domain([
+		  		0,
+		  		d3.max([
+		  			d3.max(binsFall17Map.map(e => e.frequency)),
+		  			d3.max(binsSpring18Map.map(e => e.frequency))
+		  			])
+		  		]);
+
+  			drawUpdate();
+  		});
+
+  	d3.select(".classHistogramRect").style("fill", "#7a0177");
+  	d3.select(".classHistogramText").style("stroke", "#fff");
+
+    function drawUpdate() {
+
+      d3.select("#axisXHistogram")
+          .transition().duration(500)
+          .call(d3.axisBottom(xHistogram));
+
+      d3.select("#axisYHistogram")
+        .transition().duration(500)
+        .call(d3.axisLeft(yHistogram));
+
+      var f17Update = chartHistogramGraphic.selectAll(".barF17Histogram").data(binsFall17Map);
+      f17Update.exit().remove();
+      f17Update.enter()
+        .append("rect")
+          .attr("class", "barF17Histogram")
+          .attr("x", function(d) { return xHistogram(d.key); })
+          .attr("width", xHistogram.bandwidth() / 2)
+          .attr("y", function(d) { return yHistogram(d.frequency); })
+          .attr("height", function(d) { return height - yHistogram(d.frequency); })
+        .merge(f17Update).transition().duration(500)
+          .attr("x", function(d) { return xHistogram(d.key); })
+          .attr("width", xHistogram.bandwidth() / 2)
+          .attr("y", function(d) { return yHistogram(d.frequency); })
+          .attr("height", function(d) { return height - yHistogram(d.frequency); });
+
+      
+      var s18Update = chartHistogramGraphic.selectAll(".barS18Histogram").data(binsSpring18Map);
+      s18Update.exit().remove();
+      s18Update.enter()
+        .append("rect")
+          .attr("class", "barS18Histogram")
+          .attr("x", function(d) { return xHistogram(d.key) + xHistogram.bandwidth() / 2; })
+            .attr("width", xHistogram.bandwidth() / 2)
+            .attr("y", function(d) { return yHistogram(d.frequency); })
+            .attr("height", function(d) { return height - yHistogram(d.frequency); })
+        .merge(s18Update).transition().duration(500)
+          .attr("x", function(d) { return xHistogram(d.key) + xHistogram.bandwidth() / 2; })
+            .attr("width", xHistogram.bandwidth() / 2)
+            .attr("y", function(d) { return yHistogram(d.frequency); })
+            .attr("height", function(d) { return height - yHistogram(d.frequency); });
+    }
 }
 
 function type(d) {
