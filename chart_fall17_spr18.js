@@ -343,6 +343,8 @@ function drawChart(error, fall17data, spring18data) {
 
   	////////////////////////////////////////////////////
 
+    var currentData;
+
   	var fall17ByClassFilter = fall17ByClass.filter(function(eF17) {
   		return spring18ByClass.find(function(eS18) { return eF17.key == eS18.key; });
     });
@@ -355,7 +357,7 @@ function drawChart(error, fall17data, spring18data) {
 
   	var binsFall17Map, binsSpring18Map;
 
-  	function updateData(i) {
+  	function updateData(i, coarseLevel) {
   		var upperLimit = d3.max([
   		(d3.max(fall17ByClassFilter[i].val.map(function(d) { return d.total; })) / 10 + 1) * 10,
   		(d3.max(spring18ByClassFilter[i].val.map(function(d) { return d.total; })) / 10 + 1) * 10
@@ -370,7 +372,7 @@ function drawChart(error, fall17data, spring18data) {
 
 		var binsFall17 = d3.histogram()
 			.domain(xScale.domain())
-			.thresholds(xScale.ticks(upperLimit / 10))
+			.thresholds(xScale.ticks(upperLimit / coarseLevel))
 			(fall17ByClassFilter[i].val.filter(function(e) { return e.total != 0; }).map(function(d) { return d.total; }));
 
 		binsFall17.pop();
@@ -384,7 +386,7 @@ function drawChart(error, fall17data, spring18data) {
 
 		var binsSpring18 = d3.histogram()
 			.domain(xScale.domain())
-			.thresholds(xScale.ticks(upperLimit / 10))
+			.thresholds(xScale.ticks(upperLimit / coarseLevel))
 			(spring18ByClassFilter[i].val.filter(function(e) { return e.total != 0; }).map(function(d) { return d.total; }));
 
 		binsSpring18.pop();
@@ -400,7 +402,8 @@ function drawChart(error, fall17data, spring18data) {
   	console.log(binsSpring18Map);
   	}
 
-  	updateData(0);
+  	updateData(0, 10);
+    currentData = 0;
 
   	// console.log(binsFall17Map);
   	// console.log(binsSpring18Map);
@@ -496,7 +499,8 @@ function drawChart(error, fall17data, spring18data) {
   			d3.select(this).style("fill", "#7a0177");
   			classHistogramText._groups[0][i].style.stroke = "#fff";
 
-  			updateData(i);
+  			updateData(i, 10);
+        currentData = i;
 
   			xHistogram.domain(binsFall17Map.map(e => e.key));
 
@@ -509,6 +513,9 @@ function drawChart(error, fall17data, spring18data) {
 		  		]);
 
   			drawUpdate();
+        d3.select(".handle")
+          .transition().duration(500)
+          .attr("cx", sliderWidth);
 		});
 
   	var classHistogramText = legendHistogramGraphic.append("text")
@@ -535,7 +542,8 @@ function drawChart(error, fall17data, spring18data) {
   			d3.select(this).style("stroke", "#fff");
   			classHistogramRect._groups[0][i].style.fill = "#7a0177";
 
-  			updateData(i);
+  			updateData(i, 10);
+        currentData = i;
 
   			xHistogram.domain(binsFall17Map.map(e => e.key));
 
@@ -548,6 +556,9 @@ function drawChart(error, fall17data, spring18data) {
 		  		]);
 
   			drawUpdate();
+        d3.select(".handle")
+          .transition().duration(500)
+          .attr("cx", sliderWidth);
   		});
 
   	d3.select(".classHistogramRect").style("fill", "#7a0177");
@@ -613,7 +624,7 @@ function drawChart(error, fall17data, spring18data) {
         .attr("class", "track-overlay")
         .call(d3.drag()
           .on("start.interrupt", function() { sliderGraphic.interrupt(); })
-          .on("start drag", function() { updateSlider(xSlider.invert(d3.event.x)); })
+          .on("start drag", function() { updateSlider(currentData, xSlider.invert(d3.event.x)); })
           );
 
     sliderGraphic.insert("g", ".track")
@@ -637,16 +648,60 @@ function drawChart(error, fall17data, spring18data) {
         .attr("cx", xSlider(4))
         .attr("r", 9);
 
-    function updateSlider(p) {
+    function updateSlider(i, p) {
       handle.attr("cx", xSlider(p));
-      if(p <= 1)
-        console.log("1");
-      else if(p <= 2 && p > 1)
-        console.log("2");
-      else if(p <= 3 && p > 2)
-        console.log("5");
-      else
-        console.log("10");
+      if(p <= 1) {
+        updateData(i, 1);
+        xHistogram.domain(binsFall17Map.map(e => e.key));
+
+        yHistogram.domain([
+          0,
+          d3.max([
+            d3.max(binsFall17Map.map(e => e.frequency)),
+            d3.max(binsSpring18Map.map(e => e.frequency))
+            ])
+          ]);
+        drawUpdate();
+      }
+      else if(p <= 2 && p > 1) {
+        updateData(i, 2);
+        xHistogram.domain(binsFall17Map.map(e => e.key));
+
+        yHistogram.domain([
+          0,
+          d3.max([
+            d3.max(binsFall17Map.map(e => e.frequency)),
+            d3.max(binsSpring18Map.map(e => e.frequency))
+            ])
+          ]);
+        drawUpdate();
+      }
+      else if(p <= 3 && p > 2) {
+        updateData(i, 5);
+        xHistogram.domain(binsFall17Map.map(e => e.key));
+
+        yHistogram.domain([
+          0,
+          d3.max([
+            d3.max(binsFall17Map.map(e => e.frequency)),
+            d3.max(binsSpring18Map.map(e => e.frequency))
+            ])
+          ]);
+        drawUpdate();
+      }
+      else {
+        updateData(i, 10);
+        xHistogram.domain(binsFall17Map.map(e => e.key));
+
+        yHistogram.domain([
+          0,
+          d3.max([
+            d3.max(binsFall17Map.map(e => e.frequency)),
+            d3.max(binsSpring18Map.map(e => e.frequency))
+            ])
+          ]);
+        drawUpdate();
+      }
     }
 }
 
