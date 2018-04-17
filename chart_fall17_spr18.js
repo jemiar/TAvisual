@@ -343,6 +343,7 @@ function drawChart(error, fall17data, spring18data) {
 
   	////////////////////////////////////////////////////
 
+    //used to store the index of the data currently displayed
     var currentData;
 
   	var fall17ByClassFilter = fall17ByClass.filter(function(eF17) {
@@ -446,6 +447,10 @@ function drawChart(error, fall17data, spring18data) {
   		.style("font-size", "30px")
   		.text("Frequency");
 
+    var tooltip = d3.select("body")
+                      .append("div")
+                      .attr("class", "toolTip");
+
   	var f17Histogram = chartHistogramGraphic.selectAll(".barF17Histogram")
   		.data(binsFall17Map)
   		.enter().append("rect")
@@ -453,7 +458,16 @@ function drawChart(error, fall17data, spring18data) {
   		.attr("x", function(d) { return xHistogram(d.key); })
   		.attr("width", xHistogram.bandwidth() / 2)
   		.attr("y", function(d) { return yHistogram(d.frequency); })
-  		.attr("height", function(d) { return height - yHistogram(d.frequency); });
+  		.attr("height", function(d) { return height - yHistogram(d.frequency); })
+      .on("mouseover", function(d) {
+        tooltip.style("left", (d3.event.pageX + 10) + "px")
+               .style("top", (d3.event.pageY + 10) + "px")
+               .style("display", "inline-block")
+               .html("Fall 2017" + "<br>" + "Range: " + d.key + "<br>" + "Frequency: " + d.frequency);
+      })
+      .on("mouseout", function() {
+        tooltip.style("display", "none");
+      });
 
   		console.log(f17Histogram);
 
@@ -464,7 +478,16 @@ function drawChart(error, fall17data, spring18data) {
   		.attr("x", function(d) { return xHistogram(d.key) + xHistogram.bandwidth() / 2; })
   		.attr("width", xHistogram.bandwidth() / 2)
   		.attr("y", function(d) { return yHistogram(d.frequency); })
-  		.attr("height", function(d) { return height - yHistogram(d.frequency); });
+  		.attr("height", function(d) { return height - yHistogram(d.frequency); })
+      .on("mouseover", function(d) {
+        tooltip.style("left", (d3.event.pageX + 10) + "px")
+               .style("top", (d3.event.pageY + 10) + "px")
+               .style("display", "inline-block")
+               .html("Spring 2018" + "<br>" + "Range: " + d.key + "<br>" + "Frequency: " + d.frequency);
+      })
+      .on("mouseout", function() {
+        tooltip.style("display", "none");
+      });
 
   		console.log(s18Histogram);
 
@@ -568,7 +591,19 @@ function drawChart(error, fall17data, spring18data) {
 
       d3.select("#axisXHistogram")
           .transition().duration(500)
-          .call(d3.axisBottom(xHistogram));
+          .call(d3.axisBottom(xHistogram).tickValues(
+            xHistogram.domain().filter(function(d, i) {
+              var xDataLength = xHistogram.domain().length;
+              if(xDataLength <= 8)
+                return true;
+              else if(xDataLength <= 15)
+                return i % 2;
+              else if(xDataLength <= 35)
+                return !(i % 5);
+              else
+                return !(i % 15)
+            })
+            ));
 
       d3.select("#axisYHistogram")
         .transition().duration(500)
@@ -589,6 +624,17 @@ function drawChart(error, fall17data, spring18data) {
           .attr("y", function(d) { return yHistogram(d.frequency); })
           .attr("height", function(d) { return height - yHistogram(d.frequency); });
 
+      chartHistogramGraphic.selectAll(".barF17Histogram")
+        .on("mouseover", function(d) {
+          tooltip.style("left", (d3.event.pageX + 10) + "px")
+                 .style("top", (d3.event.pageY + 10) + "px")
+                 .style("display", "inline-block")
+                 .html("Fall 2017" + "<br>" + "Range: " + d.key + "<br>" + "Frequency: " + d.frequency);
+        })
+        .on("mouseout", function() {
+          tooltip.style("display", "none");
+        });
+
       
       var s18Update = chartHistogramGraphic.selectAll(".barS18Histogram").data(binsSpring18Map);
       s18Update.exit().remove();
@@ -604,6 +650,17 @@ function drawChart(error, fall17data, spring18data) {
             .attr("width", xHistogram.bandwidth() / 2)
             .attr("y", function(d) { return yHistogram(d.frequency); })
             .attr("height", function(d) { return height - yHistogram(d.frequency); });
+
+      chartHistogramGraphic.selectAll(".barS18Histogram")
+        .on("mouseover", function(d) {
+          tooltip.style("left", (d3.event.pageX + 10) + "px")
+                 .style("top", (d3.event.pageY + 10) + "px")
+                 .style("display", "inline-block")
+                 .html("Spring 2018" + "<br>" + "Range: " + d.key + "<br>" + "Frequency: " + d.frequency);
+        })
+        .on("mouseout", function() {
+          tooltip.style("display", "none");
+        });
     }
 
     //////////////////////////////////////////////////////////////////////////////
