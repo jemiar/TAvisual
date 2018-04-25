@@ -1,0 +1,51 @@
+/* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+.row.content {height: 680px}
+
+/* Set gray background color and 100% height */
+.sidenav {
+  padding-top: 5px;
+  background-color: #f1f1f1;
+  height: 100%;
+}
+
+/* On small screens, set height to 'auto' for sidenav and grid */
+@media screen and (max-width: 767px) {
+  .sidenav {
+    height: auto;
+    padding: 15px;
+  }
+  .row.content {height:auto;} 
+}
+
+.radio, .btn {
+  font-size: 16px;
+}
+
+.checkbox {
+  font-size: 18px;
+  padding-left: 30px;
+}
+
+.checkbox-inline {
+  font-size: 18px;
+  padding-left: 50px;
+}
+
+.slider {
+  margin-top: 20px;
+}
+
+#fall17 {
+  background-color: steelblue;
+  color: #fff;
+}
+
+#spring18 {
+  background-color: #dd1c77;
+  color: #fff;
+}
+
+.legend {
+  margin-left: 60px;
+  margin-top: 30px;
+}

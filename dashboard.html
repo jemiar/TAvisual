@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>CS Department TA Dashboard</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="dashboard.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+  
+<div class="container-fluid text-left">    
+  <div class="row content">
+    <!-- Chart type -->
+    <div class="col-sm-2 sidenav">
+      <h2>Chart type:</h2>
+      <div class="radio">
+        <label><input type="radio" checked name="chartType" value="linesingle">Line - Single Class</label>
+      </div>
+      <div class="radio">
+        <label><input type="radio" name="chartType" value="linemultiple">Line - Multiple Classes</label>
+      </div>
+      <div class="radio">
+        <label><input type="radio" name="chartType" value="bar">Bar</label>
+      </div>
+      <div class="radio">
+        <label><input type="radio" name="chartType" value="histogram">Histogram</label>
+      </div>
+    </div>
+    <!-- Chart middle area-->
+    <div class="col-sm-7 text-left"> 
+      <h1 class="col-sm-12">TA Working hours</h1>
+      <div class="row">
+        <div class="checkbox col-sm-6">
+          <label><input type="checkbox" value="">By TA name</label>
+        </div>
+        <div class="btn col-sm-6">
+          <button type="button" class="btn btn-warning">Clear chart</button>
+        </div>
+      </div>
+      <div class="row">
+        <label class="checkbox-inline"><input type="checkbox" value=""><span id="fall17">Fall 2017</span></label>
+        <label class="checkbox-inline"><input type="checkbox" value=""><span id="spring18">Spring 2018</span></label>
+      </div>
+      <div class="row">
+        <div class="checkbox col-sm-6">
+          <label><input type="checkbox" value="">Fix maximum y value to: </label>
+        </div>
+        <div class="slidecontainer col-sm-6">
+          <input type="range" min="1" max="100" value="50" class="slider" id="maxYSlider">
+        </div>
+      </div>
+      <div class="row">
+        <svg class="chart" width="720" height="450"></svg>
+      </div>
+    </div>
+    <!-- Legend -->
+    <div class="col-sm-3 sidenav">
+      <h2>Legend</h2>
+      <div class="row">
+        <svg class="legend" width="200" height="550"></svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="dashboard.js"></script>
+
+</body>
+</html>
