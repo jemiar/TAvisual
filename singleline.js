@@ -38,4 +38,17 @@ function assignData(error, dataFall17, dataSpring18) {
 	if(error) throw error;
 	rawDataFall17 = dataFall17;
 	rawDataSpring18 = dataSpring18;
+	console.log(rawDataFall17);
+	console.log(rawDataSpring18);
+	var test = d3.nest()
+					.key(function(d) { return d.classID; })
+					.key(function(d) { return d.semester; })
+					.key(function(d) { return d.week; })
+					.rollup(function(v) { return {
+						week: v[0].week,
+						total: d3.sum(v, function(d) { return d.labtime + d.classtime + d.grading + d.officehr + d.classprep + d.other; })
+						};
+					})
+					.entries(dataFall17);
+	console.log(test);
 }
