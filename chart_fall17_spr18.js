@@ -624,6 +624,8 @@ function drawChart(error, fall17data, spring18data) {
           .attr("y", function(d) { return yHistogram(d.frequency); })
           .attr("height", function(d) { return height - yHistogram(d.frequency); });
 
+      console.log(f17Update);
+
       chartHistogramGraphic.selectAll(".barF17Histogram")
         .on("mouseover", function(d) {
           tooltip.style("left", (d3.event.pageX + 10) + "px")
@@ -763,12 +765,12 @@ function drawChart(error, fall17data, spring18data) {
 }
 
 function type(d) {
-  	d.labtime = +d.labtime;
-  	d.classtime = +d.classtime;
-  	d.grading = +d.grading;
-  	d.officehr = +d.officehr;
-  	d.classprep = +d.classprep;
-  	d.other = +d.other;
-  	d.week = +d.week;
-  	return d;
+    d.labtime = +d.labtime;
+    d.classtime = +d.classtime;
+    d.grading = +d.grading;
+    d.officehr = +d.officehr;
+    d.classprep = +d.classprep;
+    d.other = +d.other;
+    d.week = +d.week;
+    return d;
 }

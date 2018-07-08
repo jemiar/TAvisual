@@ -16,42 +16,26 @@
     <!-- Chart type -->
     <div class="col-sm-2 sidenav">
       <h2>Chart type:</h2>
-      <div class="radio">
-        <label><input type="radio" checked name="chartType" value="linesingle">Line - Single Class</label>
-      </div>
-      <div class="radio">
-        <label><input type="radio" name="chartType" value="linemultiple">Line - Multiple Classes</label>
-      </div>
-      <div class="radio">
-        <label><input type="radio" name="chartType" value="bar">Bar</label>
-      </div>
-      <div class="radio">
-        <label><input type="radio" name="chartType" value="histogram">Histogram</label>
-      </div>
+      <button type="button" class="btn btn-primary btn-block">Line - Single Class</button>
+      <a href="#" class="btn btn-default btn-block" role="button">Line - Multiple Classes</a>
+      <a href="#" class="btn btn-default btn-block" role="button">Bar - Single Class</a>
+      <a href="#" class="btn btn-default btn-block" role="button">Histogram</a>
     </div>
-    <!-- Chart middle area-->
+    <!-- Middle area-->
     <div class="col-sm-7 text-left"> 
-      <h1 class="col-sm-12">TA Working hours</h1>
+      <h1 class="col-sm-12">TA Working hours: Line - Single Class</h1>
+      <!-- Checkbox to display graph by TA-->
       <div class="row">
-        <div class="checkbox col-sm-6">
+        <div class="checkbox">
           <label><input type="checkbox" value="">By TA name</label>
         </div>
-        <div class="btn col-sm-6">
-          <button type="button" class="btn btn-warning">Clear chart</button>
-        </div>
       </div>
+      <!-- Row: 2 checkboxes for Fall and Spring -->
       <div class="row">
         <label class="checkbox-inline"><input type="checkbox" value=""><span id="fall17">Fall 2017</span></label>
         <label class="checkbox-inline"><input type="checkbox" value=""><span id="spring18">Spring 2018</span></label>
       </div>
-      <div class="row">
-        <div class="checkbox col-sm-6">
-          <label><input type="checkbox" value="">Fix maximum y value to: </label>
-        </div>
-        <div class="slidecontainer col-sm-6">
-          <input type="range" min="1" max="100" value="50" class="slider" id="maxYSlider">
-        </div>
-      </div>
+      <!-- Chart area -->
       <div class="row">
         <svg class="chart" width="720" height="450"></svg>
       </div>
